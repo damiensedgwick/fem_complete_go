@@ -1,5 +1,12 @@
 package main
 
+import "fem_complete_go/internal/app"
+
 func main() {
-	// FIXME: lets go!
+	app, err := app.NewApplication()
+	if err != nil {
+		panic(err)
+	}
+
+	app.Logger.Println("Hello World")
 }
