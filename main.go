@@ -18,6 +18,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer app.DB.Close()
 
 	r := routes.SetupRoutes(app)
 	server := &http.Server{
@@ -28,7 +29,7 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	app.Logger.Printf("we are running on port %d", port)
+	app.Logger.Printf("application running on port %d", port)
 
 	err = server.ListenAndServe()
 	if err != nil {
