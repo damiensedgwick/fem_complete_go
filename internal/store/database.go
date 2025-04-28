@@ -3,9 +3,10 @@ package store
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"io/fs"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/pressly/goose/v3"
 )
 
 func Open() (*sql.DB, error) {
@@ -14,7 +15,30 @@ func Open() (*sql.DB, error) {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}
 
-	log.Println("database connected")
+	fmt.Println("connected to database...")
 
 	return db, nil
+}
+
+func MigrateFS(db *sql.DB, migrationsFS fs.FS, dir string) error {
+	goose.SetBaseFS(migrationsFS)
+	defer func() {
+		goose.SetBaseFS(nil)
+	}()
+
+	return Migrate(db, dir)
+}
+
+func Migrate(db *sql.DB, dir string) error {
+	err := goose.SetDialect("postgres")
+	if err != nil {
+		return fmt.Errorf("error setting dialect: %w", err)
+	}
+
+	err = goose.Up(db, dir)
+	if err != nil {
+		return fmt.Errorf("error running migrations: %w", err)
+	}
+
+	return nil
 }
