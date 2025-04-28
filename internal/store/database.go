@@ -10,7 +10,7 @@ import (
 )
 
 func Open() (*sql.DB, error) {
-	db, err := sql.Open("pgx", "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable")
+	db, err := sql.Open("pgx", "host=localhost user=damiensedgwick password=postgres dbname=postgres port=5432 sslmode=disable")
 	if err != nil {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}

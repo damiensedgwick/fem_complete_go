@@ -1,9 +1,9 @@
 services:
   db:
-    container_name: workoutDB
+    container_name: "workoutDB"
     image: postgres:17.4-alpine
     volumes:
-      - "./database/postgres-data:/var/lib/postgresql/data:rw"
+      - "./database/postgres-data:/var/lib/postgresql@17/data:rw"
     ports:
       - "5432:5432"
     environment:
