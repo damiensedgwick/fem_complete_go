@@ -1,6 +1,8 @@
 package store
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type Workout struct {
 	ID              int            `json:"id"`
@@ -12,21 +14,22 @@ type Workout struct {
 }
 
 type WorkoutEntry struct {
-	ID              int    `json:"id"`
-	ExerciseName    string `json:"exercise_name"`
-	Sets            int    `json:"sets"`
-	Reps            *int   `json:"reps"`
-	DurationSeconds *int   `json:"duration_seconds"`
-	Notes           string `json:"notes"`
-	OrderIndex      int    `json:"order_index"`
+	ID              int      `json:"id"`
+	ExerciseName    string   `json:"exercise_name"`
+	Sets            int      `json:"sets"`
+	Reps            *int     `json:"reps"`
+	DurationSeconds *int     `json:"duration_seconds"`
+	Weight          *float64 `json:"weight"`
+	Notes           string   `json:"notes"`
+	OrderIndex      int      `json:"order_index"`
 }
 
-type PostgresWorkoutStore struct {
+type SqliteWorkoutStore struct {
 	db *sql.DB
 }
 
-func NewPostgresWorkoutStore(db *sql.DB) *PostgresWorkoutStore {
-	return &PostgresWorkoutStore{
+func NewSqliteWorkoutStore(db *sql.DB) *SqliteWorkoutStore {
+	return &SqliteWorkoutStore{
 		db: db,
 	}
 }
@@ -36,7 +39,7 @@ type WorkoutStore interface {
 	GetWorkoutByID(id int64) (*Workout, error)
 }
 
-func (pg *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error) {
+func (pg *SqliteWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error) {
 	tx, err := pg.db.Begin()
 	if err != nil {
 		return nil, err
@@ -59,7 +62,7 @@ func (pg *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			RETURNING id
 		`
-		err = tx.QueryRow(query, workout.ID, entry.ExerciseName, entry.Sets, entry.Reps, entry.DurationSeconds, entry.Notes, entry.OrderIndex).Scan(&entry.ID)
+		err = tx.QueryRow(query, workout.ID, entry.ExerciseName, entry.Sets, entry.Reps, entry.DurationSeconds, entry.Weight, entry.Notes, entry.OrderIndex).Scan(&entry.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -73,7 +76,7 @@ func (pg *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error
 	return workout, nil
 }
 
-func (pg *PostgresWorkoutStore) GetWorkoutByID(id int64) (*Workout, error) {
+func (pg *SqliteWorkoutStore) GetWorkoutByID(id int64) (*Workout, error) {
 	workout := &Workout{}
 
 	query := `
