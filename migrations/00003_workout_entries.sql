@@ -1,21 +1,22 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS workout_entries (
-    id BIGSERIAL PRIMARY KEY,
-    workout_id BIGINT NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
-    exercise_name VARCHAR(255) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    workout_id INTEGER NOT NULL,
+    exercise_name TEXT NOT NULL,
     sets INTEGER NOT NULL,
     reps INTEGER NOT NULL,
     duration_seconds INTEGER NOT NULL,
-    weight DECIMAL NOT NULL,
+    weight REAL NOT NULL,
     notes TEXT,
     order_index INTEGER NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT valid_workout_entry CHECK (
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (workout_id) REFERENCES workouts(id) ON DELETE CASCADE,
+    CHECK (
         (reps IS NOT NULL OR duration_seconds IS NOT NULL) AND
         (reps IS NULL OR duration_seconds IS NULL)
-    ),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    )
 );
 -- +goose StatementEnd
 

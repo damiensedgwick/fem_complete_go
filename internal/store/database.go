@@ -4,13 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"io/fs"
+	"os"
 
-	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/pressly/goose/v3"
+	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
 func Open() (*sql.DB, error) {
-	db, err := sql.Open("pgx", "host=localhost user=damiensedgwick password=postgres dbname=postgres port=5432 sslmode=disable")
+	url := os.Getenv("TURSO_DATABASE_URL")
+	token := os.Getenv("TURSO_AUTH_TOKEN")
+	connectionString := fmt.Sprintf("%s?authToken=%s", url, token)
+	db, err := sql.Open("libsql", connectionString)
 	if err != nil {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}
@@ -30,7 +34,7 @@ func MigrateFS(db *sql.DB, migrationsFS fs.FS, dir string) error {
 }
 
 func Migrate(db *sql.DB, dir string) error {
-	err := goose.SetDialect("postgres")
+	err := goose.SetDialect("sqlite3")
 	if err != nil {
 		return fmt.Errorf("error setting dialect: %w", err)
 	}

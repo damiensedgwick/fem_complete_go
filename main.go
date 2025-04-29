@@ -7,12 +7,19 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	var port int
 	flag.IntVar(&port, "port", 8080, "Port to run the server on")
 	flag.Parse()
+
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
 
 	app, err := app.NewApplication()
 	if err != nil {

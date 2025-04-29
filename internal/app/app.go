@@ -18,12 +18,12 @@ type Application struct {
 }
 
 func NewApplication() (*Application, error) {
-	pgDB, err := store.Open()
+	db, err := store.Open()
 	if err != nil {
 		return nil, err
 	}
 
-	err = store.MigrateFS(pgDB, migrations.FS, ".")
+	err = store.MigrateFS(db, migrations.FS, ".")
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +38,7 @@ func NewApplication() (*Application, error) {
 	app := &Application{
 		Logger:         logger,
 		WorkoutHandler: workoutHandler,
-		DB:             pgDB,
+		DB:             db,
 	}
 
 	return app, nil
