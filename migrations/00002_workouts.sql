@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS workouts (
     title TEXT NOT NULL,
     description TEXT,
     duration_minutes INTEGER NOT NULL,
-    calories_burned INTEGER NOT NULL,
+    calories_burned INTEGER,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
 );

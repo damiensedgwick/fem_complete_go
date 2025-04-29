@@ -34,7 +34,7 @@ func MigrateFS(db *sql.DB, migrationsFS fs.FS, dir string) error {
 }
 
 func Migrate(db *sql.DB, dir string) error {
-	err := goose.SetDialect("sqlite3")
+	err := goose.SetDialect("turso")
 	if err != nil {
 		return fmt.Errorf("error setting dialect: %w", err)
 	}
