@@ -38,6 +38,7 @@ type WorkoutStore interface {
 	CreateWorkout(*Workout) (*Workout, error)
 	GetWorkoutByID(id int64) (*Workout, error)
 	UpdateWorkout(*Workout) error
+	DeleteWorkout(id int64) error
 }
 
 func (s *SqliteWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error) {
@@ -162,4 +163,26 @@ func (s *SqliteWorkoutStore) UpdateWorkout(workout *Workout) error {
 	}
 
 	return tx.Commit()
+}
+
+func (s *SqliteWorkoutStore) DeleteWorkout(id int64) error {
+	query := `
+		DELETE FROM workouts
+		WHERE id =?
+	`
+	result, err := s.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }

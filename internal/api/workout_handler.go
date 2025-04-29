@@ -127,3 +127,22 @@ func (wh *WorkoutHandler) HandleUpdateWorkout(w http.ResponseWriter, r *http.Req
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(existingWorkout)
 }
+
+func (wh *WorkoutHandler) HandleDeleteWorkout(w http.ResponseWriter, r *http.Request) {
+	paramsWorkoutID := chi.URLParam(r, "id")
+	if paramsWorkoutID == "" {
+		http.NotFound(w, r)
+		return
+	}
+	workoutID, err := strconv.ParseInt(paramsWorkoutID, 10, 64)
+	if err != nil {
+		http.NotFound(w, r) // this is a cheat for now, we'll fix this later
+		return
+	}
+	if err := wh.workoutStore.DeleteWorkout(workoutID); err != nil {
+		http.Error(w, "failed to delete workout", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
