@@ -14,6 +14,7 @@ import (
 type Application struct {
 	Logger         *log.Logger
 	WorkoutHandler *api.WorkoutHandler
+	UserHandler    *api.UserHandler
 	DB             *sql.DB
 }
 
@@ -32,13 +33,16 @@ func NewApplication() (*Application, error) {
 
 	// stores
 	workoutStore := store.NewSqliteWorkoutStore(db)
+	userStore := store.NewSqliteUserStore(db)
 
 	// handlers
 	workoutHandler := api.NewWorkoutHandler(workoutStore, logger)
+	userHandler := api.NewUserHandler(userStore, logger)
 
 	app := &Application{
 		Logger:         logger,
 		WorkoutHandler: workoutHandler,
+		UserHandler:    userHandler,
 		DB:             db,
 	}
 
