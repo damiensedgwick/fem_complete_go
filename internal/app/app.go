@@ -15,6 +15,7 @@ type Application struct {
 	Logger         *log.Logger
 	WorkoutHandler *api.WorkoutHandler
 	UserHandler    *api.UserHandler
+	TokenHandler   *api.TokenHandler
 	DB             *sql.DB
 }
 
@@ -34,15 +35,18 @@ func NewApplication() (*Application, error) {
 	// stores
 	workoutStore := store.NewSqliteWorkoutStore(db)
 	userStore := store.NewSqliteUserStore(db)
+	tokenStore := store.NewSqliteTokenStore(db)
 
 	// handlers
 	workoutHandler := api.NewWorkoutHandler(workoutStore, logger)
 	userHandler := api.NewUserHandler(userStore, logger)
+	tokenHandler := api.NewTokenHandler(tokenStore, userStore, logger)
 
 	app := &Application{
 		Logger:         logger,
 		WorkoutHandler: workoutHandler,
 		UserHandler:    userHandler,
+		TokenHandler:   tokenHandler,
 		DB:             db,
 	}
 
