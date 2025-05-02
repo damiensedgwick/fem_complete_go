@@ -1,8 +1,11 @@
 package store
 
 import (
+	"crypto/sha256"
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -48,6 +51,12 @@ type User struct {
 	UpdatedAt    string   `json:"updated_at"`
 }
 
+var AnonymousUser = &User{}
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
+}
+
 type SqliteUserStore struct {
 	db *sql.DB
 }
@@ -62,6 +71,7 @@ type UserStore interface {
 	CreateUser(*User) error
 	GetUserByUsername(username string) (*User, error)
 	UpdateUser(*User) error
+	GetUserToken(scope string, tokenPlaintext string) (*User, error)
 }
 
 func (s *SqliteUserStore) CreateUser(user *User) error {
@@ -120,4 +130,29 @@ func (s *SqliteUserStore) UpdateUser(user *User) error {
 	}
 
 	return nil
+}
+
+func (s *SqliteUserStore) GetUserToken(scope string, tokenPlaintext string) (*User, error) {
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+
+	query := `
+		SELECT u.id, u.username, u.email, u.password_hash, u.bio, u.created_at, u.updated_at
+		FROM users u
+		INNER JOIN tokens t ON t.user_id = u.id
+		WHERE t.hash = ? AND t.scope = ? AND t.expires_at > ?
+	`
+
+	user := &User{
+		PasswordHash: password{},
+	}
+
+	now := time.Now().Unix()
+
+	err := s.db.QueryRow(query, tokenHash[:], scope, now).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash.hash, &user.Bio, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		fmt.Println("we are here")
+		return nil, err
+	}
+
+	return user, nil
 }

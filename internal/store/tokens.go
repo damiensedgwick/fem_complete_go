@@ -3,6 +3,7 @@ package store
 import (
 	"database/sql"
 	"fem_complete_go/internal/tokens"
+	"fmt"
 	"time"
 )
 
@@ -28,12 +29,14 @@ func (s *SqliteTokenStore) CreateNewToken(userID int64, ttl time.Duration, scope
 		return nil, err
 	}
 
+	fmt.Println("CREATE TOKEN", token.Hash)
 	err = s.Insert(token)
 
 	return token, err
 }
 
 func (s *SqliteTokenStore) Insert(token *tokens.Token) error {
+	fmt.Println("INSERT TOKEN", token.Hash)
 	query := `
 		INSERT INTO tokens (hash, user_id, expires_at, scope)
 		VALUES (?, ?, ?, ?)

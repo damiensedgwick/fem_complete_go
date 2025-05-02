@@ -2,7 +2,6 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS workouts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    -- user_id
     title TEXT NOT NULL,
     description TEXT,
     duration_minutes INTEGER NOT NULL,

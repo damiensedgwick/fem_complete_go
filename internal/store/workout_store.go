@@ -5,23 +5,24 @@ import (
 )
 
 type Workout struct {
-	ID              int            `json:"id"`
+	ID              int64          `json:"id"`
+	UserID          int64          `json:"user_id"`
 	Title           string         `json:"title"`
 	Description     string         `json:"description"`
-	DurationMinutes int            `json:"duration_minutes"`
-	CaloriesBurned  int            `json:"calories_burned"`
+	DurationMinutes int64          `json:"duration_minutes"`
+	CaloriesBurned  int64          `json:"calories_burned"`
 	Entries         []WorkoutEntry `json:"entries"`
 }
 
 type WorkoutEntry struct {
-	ID              int      `json:"id"`
+	ID              int64    `json:"id"`
 	ExerciseName    string   `json:"exercise_name"`
-	Sets            int      `json:"sets"`
-	Reps            *int     `json:"reps"`
-	DurationSeconds *int     `json:"duration_seconds"`
+	Sets            int64    `json:"sets"`
+	Reps            *int64   `json:"reps"`
+	DurationSeconds *int64   `json:"duration_seconds"`
 	Weight          *float64 `json:"weight"`
 	Notes           string   `json:"notes"`
-	OrderIndex      int      `json:"order_index"`
+	OrderIndex      int64    `json:"order_index"`
 }
 
 type SqliteWorkoutStore struct {
@@ -39,6 +40,7 @@ type WorkoutStore interface {
 	GetWorkoutByID(id int64) (*Workout, error)
 	UpdateWorkout(*Workout) error
 	DeleteWorkout(id int64) error
+	GetWorkoutOwner(id int64) (int64, error)
 }
 
 func (s *SqliteWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error) {
@@ -49,11 +51,11 @@ func (s *SqliteWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error) {
 	defer tx.Rollback()
 
 	query := `
-		INSERT INTO workouts (title, description, duration_minutes, calories_burned)
-		VALUES (?, ?, ?, ?)
+		INSERT INTO workouts (user_id, title, description, duration_minutes, calories_burned)
+		VALUES (?, ?, ?, ?, ?)
 		RETURNING id
 	`
-	err = tx.QueryRow(query, workout.Title, workout.Description, workout.DurationMinutes, workout.CaloriesBurned).Scan(&workout.ID)
+	err = tx.QueryRow(query, workout.UserID, workout.Title, workout.Description, workout.DurationMinutes, workout.CaloriesBurned).Scan(&workout.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -185,4 +187,19 @@ func (s *SqliteWorkoutStore) DeleteWorkout(id int64) error {
 	}
 
 	return nil
+}
+
+func (s *SqliteWorkoutStore) GetWorkoutOwner(id int64) (int64, error) {
+	var userID int64
+	query := `
+		SELECT user_id
+		FROM workouts
+		WHERE id = ?
+	`
+	err := s.db.QueryRow(query, id).Scan(&userID)
+	if err != nil {
+		return 0, err
+	}
+
+	return userID, nil
 }

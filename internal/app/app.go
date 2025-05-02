@@ -3,6 +3,7 @@ package app
 import (
 	"database/sql"
 	"fem_complete_go/internal/api"
+	"fem_complete_go/internal/middleware"
 	"fem_complete_go/internal/store"
 	"fem_complete_go/migrations"
 	"fmt"
@@ -15,6 +16,7 @@ type Application struct {
 	Logger         *log.Logger
 	WorkoutHandler *api.WorkoutHandler
 	UserHandler    *api.UserHandler
+	Middleware     middleware.UserMiddleware
 	TokenHandler   *api.TokenHandler
 	DB             *sql.DB
 }
@@ -41,11 +43,13 @@ func NewApplication() (*Application, error) {
 	workoutHandler := api.NewWorkoutHandler(workoutStore, logger)
 	userHandler := api.NewUserHandler(userStore, logger)
 	tokenHandler := api.NewTokenHandler(tokenStore, userStore, logger)
+	middlewareHandler := middleware.UserMiddleware{UserStore: userStore}
 
 	app := &Application{
 		Logger:         logger,
 		WorkoutHandler: workoutHandler,
 		UserHandler:    userHandler,
+		Middleware:     middlewareHandler,
 		TokenHandler:   tokenHandler,
 		DB:             db,
 	}

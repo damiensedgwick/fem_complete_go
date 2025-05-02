@@ -147,7 +147,7 @@ func TestCreateWorkout(t *testing.T) {
 	}
 }
 
-func IntPtr(i int) *int {
+func IntPtr(i int64) *int64 {
 	return &i
 }
 
